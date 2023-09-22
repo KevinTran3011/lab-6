@@ -1,8 +1,8 @@
-# Base this image on an official Node.js long term support image.
+# Base this image on an official Node.js long-term support image.
 FROM node:18.16.0-alpine
 
 # Install some additional packages that we need.
-RUN apk add --no-cache tini curl bash sudo
+RUN apk add --no-cache tini curl bash sudo postgresql-client
 
 # Use Tini as the init process. Tini will take care of important system stuff
 # for us, like forwarding signals and reaping zombie processes.
@@ -13,22 +13,20 @@ RUN mkdir -p /app
 WORKDIR /app
 
 # Install the project's NPM dependencies.
-COPY package.json /app/
-RUN npm --silent install
-RUN npm install mysql2 --save
-RUN mkdir /deps && mv node_modules /deps/node_modules
+COPY package.json package-lock.json /app/
+RUN npm ci --only=production
 
 # Set environment variables to point to the installed NPM modules.
-ENV NODE_PATH=/deps/node_modules \
-    PATH=/deps/node_modules/.bin:$PATH
+ENV NODE_PATH=/app/node_modules \
+    PATH=/app/node_modules/.bin:$PATH
 
 # Copy our application files into the image.
 COPY . /app
 
 # Switch to a non-privileged user for running commands inside the container.
-RUN chown -R node:node /app /deps \
+RUN chown -R node:node /app \
  && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-node
 USER node
 
-# Run an interactive shell
-CMD [ "bash" ]
+# Run your application
+CMD ["node", "your-app-entry-point.js"]

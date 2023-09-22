@@ -71,8 +71,43 @@ Article.findByPk(2)
 // Exercise 1
 // *** TODO: Insert code here ***
 
+.then(() =>Article.findAll({
+  where:{
+    id: {[Op.or]:[
+      1,3
+    ]}
+  }
+}))
+.then(articles =>{
+    console.log('#Articles whose id is either 1 or 3: ');
+    articles.forEach(article => {
+      console.log(article.dataValues);
+    });
+    console.log();
+    
+})
+
 // Exercise 2
 // *** TODO: Insert code here ***
+
+.then(() => Article.findByPk(2))
+  .then(article => {
+    if (article) {
+      return article.update({ content: 'Sequelize is the worst ORM ever!' });
+    } else {
+      console.log('Article with id 2 not found.');
+    }
+  })
+  .then(() => Article.findByPk(2)) // Retrieve the updated article
+  .then(article => {
+    if (article) {
+      console.log('# Article with id 2 after update:');
+      console.log(article.dataValues);
+      console.log();
+    } else {
+      console.log('Article with id 2 not found.');
+    }
+  })
 
 // Close the database connection.
 .catch(console.error).then(() => db.close());
