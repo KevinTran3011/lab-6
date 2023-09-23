@@ -11,7 +11,7 @@ services:
     volumes:
       - "./backend:/app"
     env_file:
-      - ./env/mysql.env
+      - ./env/postgres.env
     links:
       - db
 
